@@ -33,7 +33,7 @@ def is_good_head(head: Element, snake: Snake) -> bool:
     Проверяет, что очередной ход "хороший", то если нет столкновения
     змейки с границей поля или с самой собой.
     """
-    return is_field_contains(head) and not snake.is_contains(head)
+    return not snake.is_contains(head)
 
 
 def gen_apple(snake: Snake) -> Element:

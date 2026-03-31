@@ -1,7 +1,7 @@
 from collections import deque
 from element import Element
 from direction import Direction
-
+from constants import HEIGHT, WIDTH
 
 class Snake:
     """
@@ -29,18 +29,25 @@ class Snake:
 
     def get_new_head(self) -> Element:
         """
-        Вычисляет новую голову змейки в зависимости от направления движения
+        Вычисляет новую голову змейки в зависимости от направления движения с учётом перехода сквозь стены.
         :return:
         """
         head = self.snake[0]
         if self.direction == Direction.UP:
-            return Element(head.x, head.y + 1)
+            new_y = (head.y + 1) % HEIGHT
+            return Element(head.x, new_y)
+
         if self.direction == Direction.RIGHT:
-            return Element(head.x + 1, head.y)
+            new_x = (head.x + 1) % WIDTH
+            return Element(new_x, head.y)
+
         if self.direction == Direction.DOWN:
-            return Element(head.x, head.y - 1)
+            new_y = (head.y - 1) % HEIGHT
+            return Element(head.x, new_y)
+
         if self.direction == Direction.LEFT:
-            return Element(head.x - 1, head.y)
+            new_x = (head.x - 1) % WIDTH
+            return Element(new_x, head.y)
         raise ValueError("Неопознанное направление")
 
     def set_direction(self, new_direction):
