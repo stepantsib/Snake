@@ -2,6 +2,7 @@ from infrastructure import Infrastructure
 from utils import *
 from food import Food, FoodType
 from constants import *
+from random import choices
 
 class Game:
     """
@@ -20,11 +21,10 @@ class Game:
         self.snake = Snake(head)
 
         self.food = self._generate_food()  # храним Food объект
-
         self.tick_counter = 0                                 # Счётчик кадров для контроля скорости
-        self.score = 0                                        # Текущий счёт игрока
         self.snake_speed_delay = INITIAL_SPEED_DELAY       # Задержка движения змейки (чем больше — тем медленнее)
 
+        # Для эффекта ускорения
         self.speed_boost_end_tick = 0
         self.is_speed_boost_active = False
 
@@ -34,8 +34,12 @@ class Game:
 
     def _generate_food(self) -> Food:
         """Генерирует случайный объект еды случайного типа"""
+
         element = gen_apple(self.snake)
-        food_type = FoodType(randrange(1, 4))  # 1, 2, 3
+        types = [FoodType.NORMAL, FoodType.SPEED, FoodType.SHRINK]
+        weights = [65, 25, 10]  # вероятности выпадения яблок
+        food_type = choices(types, weights=weights, k=1)[0]
+
         return Food(element, food_type)
 
 
@@ -73,7 +77,8 @@ class Game:
         self.infrastructure.draw_element(self.food.x, self.food.y, color)
 
         # Рисует текущий счёт
-        self.infrastructure.draw_score(self.score)
+        current_score = len(self.snake.snake)
+        self.infrastructure.draw_score(current_score)
 
         # Если игра окончена — показывает надпись GAME OVER
         if self.is_game_over:
@@ -117,17 +122,12 @@ class Game:
 
     def _eat_food(self):
         """Обработка съедания еды"""
-        if self.food.type == FoodType.NORMAL:
-            self.score += 1
-
-        elif self.food.type == FoodType.SPEED:
-            self.score += 2
+        if self.food.type == FoodType.SPEED:
             self.is_speed_boost_active = True
             self.snake_speed_delay = INITIAL_SPEED_DELAY // 2  # в 2 раза быстрее
             self.speed_boost_end_tick = self.tick_counter + (5 * FPS)
 
         elif self.food.type == FoodType.SHRINK:
-            self.score += 1
             self._shrink_snake()
 
         # Генерируем новую еду
