@@ -10,3 +10,7 @@ APPLE_COLOR = "red"
 SCORE_COLOR = "white"
 SCREEN_COLOR = "black"
 GAME_OVER_COLOR = "red"
+# Цвета еды
+NORMAL_FOOD_COLOR = "red"
+SPEED_FOOD_COLOR = "blue"
+SHRINK_FOOD_COLOR = "white"

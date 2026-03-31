@@ -1,6 +1,7 @@
 from infrastructure import Infrastructure
 from utils import *
-
+from food import Food, FoodType
+from constants import *
 
 class Game:
     """
@@ -18,15 +19,25 @@ class Game:
         head = get_center_element()
         self.snake = Snake(head)
 
-        # Генерируем первое яблоко в случайном месте (не на змейке)
-        self.apple = gen_apple(self.snake)
+        self.food = self._generate_food()  # храним Food объект
 
         self.tick_counter = 0                                 # Счётчик кадров для контроля скорости
         self.score = 0                                        # Текущий счёт игрока
         self.snake_speed_delay = INITIAL_SPEED_DELAY       # Задержка движения змейки (чем больше — тем медленнее)
 
+        self.speed_boost_end_tick = 0
+        self.is_speed_boost_active = False
+
         self.is_running = True
         self.is_game_over = False
+
+
+    def _generate_food(self) -> Food:
+        """Генерирует случайный объект еды случайного типа"""
+        element = gen_apple(self.snake)
+        food_type = FoodType(randrange(1, 4))  # 1, 2, 3
+        return Food(element, food_type)
+
 
     def process_events(self):
         """Обработка ввода от пользователя"""
@@ -51,8 +62,15 @@ class Game:
         for e in self.snake.snake:
             self.infrastructure.draw_element(e.x, e.y, SNAKE_COLOR)
 
-        # Рисует яблоко
-        self.infrastructure.draw_element(self.apple.x, self.apple.y, APPLE_COLOR)
+        # Выбирает нужный цвет
+        color = {
+            FoodType.NORMAL: NORMAL_FOOD_COLOR,
+            FoodType.SPEED: SPEED_FOOD_COLOR,
+            FoodType.SHRINK: SHRINK_FOOD_COLOR
+        }[self.food.type]
+
+        # Рисует еду с нужным цветом
+        self.infrastructure.draw_element(self.food.x, self.food.y, color)
 
         # Рисует текущий счёт
         self.infrastructure.draw_score(self.score)
@@ -76,25 +94,51 @@ class Game:
 
         self.tick_counter += 1
 
+        if self.is_speed_boost_active and self.tick_counter >= self.speed_boost_end_tick:
+            self.is_speed_boost_active = False
+            self.snake_speed_delay = INITIAL_SPEED_DELAY
+
         # Двигает змейку только через определённые интервалы для контроля скорости
         if not self.tick_counter % self.snake_speed_delay:
-
             # Вычисляет позицию новой головы
             head = self.snake.get_new_head()
 
-            # Проверяет не врезались ли в стену или себя
+            # Проверяет не врезались ли в себя
             if is_good_head(head, self.snake):
                 self.snake.enqueue(head) # Добавляем новую голову
 
-                # Проверяет, съели ли яблоко
-                if head == self.apple:
-                    self.score += 1
-                    self.apple = gen_apple(self.snake)
+                if head == self.food.element:  # Съели еду
+                    self._eat_food()
                 else:
                     # Убирает хвост (обычное движение)
                     self.snake.dequeue()
             else:
                 self.is_game_over = True
+
+    def _eat_food(self):
+        """Обработка съедания еды"""
+        if self.food.type == FoodType.NORMAL:
+            self.score += 1
+
+        elif self.food.type == FoodType.SPEED:
+            self.score += 2
+            self.is_speed_boost_active = True
+            self.snake_speed_delay = INITIAL_SPEED_DELAY // 2  # в 2 раза быстрее
+            self.speed_boost_end_tick = self.tick_counter + (5 * FPS)
+
+        elif self.food.type == FoodType.SHRINK:
+            self.score += 1
+            self._shrink_snake()
+
+        # Генерируем новую еду
+        self.food = self._generate_food()
+
+
+    def _shrink_snake(self):
+        """Уменьшает длину змейки в 2 раза (минимум 1 сегмент)"""
+        target_length = max(1, len(self.snake.snake) // 2)
+        while len(self.snake.snake) > target_length:
+            self.snake.dequeue()
 
 
     def loop(self):
