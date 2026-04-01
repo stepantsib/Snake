@@ -37,7 +37,7 @@ class Game:
 
         element = gen_apple(self.snake)
         types = [FoodType.NORMAL, FoodType.SPEED, FoodType.SHRINK]
-        weights = [65, 25, 10]  # вероятности выпадения яблок
+        weights = [75, 20, 5]  # вероятности выпадения яблок
         food_type = choices(types, weights=weights, k=1)[0]
 
         return Food(element, food_type)
