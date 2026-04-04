@@ -90,15 +90,21 @@ class Game:
         if not self.tick_counter % self.snake_speed_delay:
             head = self.snake.get_new_head()
 
-            if is_good_head(head, self.snake, self.level):  # проверка препятствий
-                self.snake.enqueue(head)
-
-                if head == self.food.element:
-                    self._eat_food()
-                else:
-                    self.snake.dequeue()
-            else:
+            # Проверка препятствий
+            if self.level.is_obstacle(head.x, head.y):
                 self.is_game_over = True
+            else:
+                will_eat = (head == self.food.element)
+
+                # Разрешаем new_head == хвост, если мы НЕ едим (хвост сейчас освободится)
+                if self.snake.is_contains(head) and not (not will_eat and head == self.snake.snake[-1]):
+                    self.is_game_over = True
+                else:
+                    self.snake.enqueue(head)
+                    if will_eat:
+                        self._eat_food()
+                    else:
+                        self.snake.dequeue()
 
             # Проверка победы на уровне
             current_score = len(self.snake.snake)
