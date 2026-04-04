@@ -28,22 +28,14 @@ def is_field_contains(element: Element) -> bool:
     return 0 <= element.x < WIDTH and 0 <= element.y < HEIGHT
 
 
-def is_good_head(head: Element, snake: Snake) -> bool:
-    """
-    Проверяет, что очередной ход "хороший", то если нет столкновения
-    змейки с границей поля или с самой собой.
-    """
-    return not snake.is_contains(head)
-
-
-def gen_apple(snake: Snake) -> Element:
-    """
-    Вычисляет элемент поля, где будет показано новое яблоко.
-    Гарантирует, что яблоко появится вне тела змейки.
-    """
-    candidate = None
-    while candidate is None:
+def gen_apple(snake: Snake, game_level) -> Element:
+    """Генерирует яблоко вне змейки и вне препятствий"""
+    while True:
         candidate = gen_random_element()
-        if snake.is_contains(candidate):
-            candidate = None
-    return candidate
+        if not snake.is_contains(candidate) and not game_level.is_obstacle(candidate.x, candidate.y):
+            return candidate
+
+
+def is_good_head(head: Element, snake: Snake, game_level) -> bool:
+    """Проверка на столкновение с собой и с препятствиями"""
+    return (not snake.is_contains(head)) and (not game_level.is_obstacle(head.x, head.y))

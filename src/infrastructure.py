@@ -107,3 +107,17 @@ class Infrastructure:
         :return:
         """
         pygame.quit()
+
+    def draw_level_info(self, level_num: int, target: int):
+        """Отображает текущий уровень и цель"""
+        text = f"Уровень {level_num}  |  Цель: {target}"
+        rendered = self.font.render(text, True, pygame.Color("white"))
+        self.screen.blit(rendered, (5, 40))   # ниже счёта
+
+    def draw_level_complete(self, level_num: int):
+        """Сообщение о прохождении уровня"""
+        if level_num < 3:
+            message = self.font.render(f"Уровень {level_num} пройден!", True, pygame.Color("green"))
+        else:
+            message = self.font.render("ИГРА ПРОЙДЕНА!", True, pygame.Color("green"))
+        self.screen.blit(message, message.get_rect(center=(WIDTH * SCALE // 2, HEIGHT * SCALE // 2 - 50)))
