@@ -88,25 +88,33 @@ class Game:
             self.snake_speed_delay = INITIAL_SPEED_DELAY
 
         if not self.tick_counter % self.snake_speed_delay:
-            head = self.snake.get_new_head()
+            new_head = self.snake.get_new_head()
 
-            # Проверка препятствий
-            if self.level.is_obstacle(head.x, head.y):
+            if self.level.is_obstacle(new_head.x, new_head.y):
+                self.is_game_over = True
+                return
+
+            will_eat = (new_head == self.food.element)
+
+            collision = False
+            if self.snake.is_contains(new_head):
+                if will_eat:
+                    collision = True
+                else:
+                    tail = self.snake.snake[-1]
+                    if new_head != tail:
+                        collision = True
+
+            if collision:
                 self.is_game_over = True
             else:
-                will_eat = (head == self.food.element)
-
-                # Разрешаем new_head == хвост, если мы НЕ едим (хвост сейчас освободится)
-                if self.snake.is_contains(head) and not (not will_eat and head == self.snake.snake[-1]):
-                    self.is_game_over = True
+                self.snake.enqueue(new_head)
+                if will_eat:
+                    self._eat_food()
                 else:
-                    self.snake.enqueue(head)
-                    if will_eat:
-                        self._eat_food()
-                    else:
-                        self.snake.dequeue()
+                    self.snake.dequeue()
 
-            # Проверка победы на уровне
+            # Проверка победы
             current_score = len(self.snake.snake)
             if current_score >= self.level.target_score:
                 self._complete_level()
