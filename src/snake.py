@@ -3,6 +3,7 @@ from element import Element
 from direction import Direction
 from constants import HEIGHT, WIDTH
 
+
 class Snake:
     """
     Класс контролирует элементы тела и направление движения змейки.

@@ -1,6 +1,7 @@
 from enum import Enum
 from constants import *
 
+
 class Level(Enum):
     ONE = 1
     TWO = 2

@@ -1,6 +1,7 @@
-from game import Game
 from infrastructure import Infrastructure
+from menu import Menu
 
 if __name__ == "__main__":
-    game = Game(Infrastructure())
-    game.loop()
+    infrastructure = Infrastructure()
+    menu = Menu(infrastructure)
+    menu.run()

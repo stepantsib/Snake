@@ -92,6 +92,7 @@ class Game:
 
             if self.level.is_obstacle(new_head.x, new_head.y):
                 self.is_game_over = True
+                self.is_running = False
                 return
 
             will_eat = (new_head == self.food.element)
@@ -107,6 +108,7 @@ class Game:
 
             if collision:
                 self.is_game_over = True
+                self.is_running = False
             else:
                 self.snake.enqueue(new_head)
                 if will_eat:
@@ -148,10 +150,12 @@ class Game:
             self.food = self._generate_food()
             self.is_level_completed = False
         else:
-            # Финал игры
             total_time = int(time.time() - self.game_start_time)
             self._save_highscore(total_time)
             print(f"Поздравляем! Вы прошли все уровни за {total_time} секунд!")
+
+            self.is_running = False
+            self.is_level_completed = True
 
     def _save_highscore(self, time_sec: int):
         try:
@@ -176,9 +180,8 @@ class Game:
             3. Отрисовка кадра (render)
         """
         while self.is_running:
+            self.infrastructure.pump_events()
+
             self.process_events()
             self.update_state()
             self.render()
-
-        # Корректное завершение pygame при выходе из игры
-        self.infrastructure.quit()
