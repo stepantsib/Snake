@@ -48,6 +48,7 @@ class Menu:
 
         self.music_button = self.main_buttons[2]
 
+        # Музыка
         try:
             pygame.mixer.music.load("background_music.mp3")
             pygame.mixer.music.set_volume(0.4)
@@ -71,10 +72,12 @@ class Menu:
 
     def _process_events(self, buttons=None, exit_on_input=False):
         if buttons is not None:
+            # Hover
             pos = self.infrastructure.get_mouse_position()
             for btn in buttons:
                 btn.check_hover(pos)
 
+            # Клик
             if self.infrastructure.was_mouse_clicked():
                 for btn in buttons:
                     if btn.is_clicked(pos):

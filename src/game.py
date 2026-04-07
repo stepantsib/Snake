@@ -32,7 +32,7 @@ class Game:
         self.is_level_completed = False
 
     def _generate_food(self) -> Food:
-        element = gen_apple(self.snake, self.level)
+        element = gen_apple(self.snake, self.level)  # передаём уровень для избежания препятствий
         types = [FoodType.NORMAL, FoodType.SPEED, FoodType.SHRINK]
         weights = [75, 23, 2]
         food_type = choices(types, weights=weights, k=1)[0]
@@ -49,12 +49,15 @@ class Game:
     def render(self):
         self.infrastructure.fill_screen()
 
+        # Рисуем змейку
         for e in self.snake.snake:
             self.infrastructure.draw_element(e.x, e.y, SNAKE_COLOR)
 
+        # Рисуем препятствия
         for ox, oy in self.level.obstacles:
             self.infrastructure.draw_element(ox, oy, "gray")
 
+        # Рисуем еду
         color = {
             FoodType.NORMAL: NORMAL_FOOD_COLOR,
             FoodType.SPEED: SPEED_FOOD_COLOR,
@@ -62,6 +65,7 @@ class Game:
         }[self.food.type]
         self.infrastructure.draw_element(self.food.x, self.food.y, color)
 
+        # Счёт и уровень
         current_score = len(self.snake.snake)
         self.infrastructure.draw_score(current_score)
         self.infrastructure.draw_level_info(self.current_level_num, self.level.target_score)
@@ -112,6 +116,7 @@ class Game:
                 else:
                     self.snake.dequeue()
 
+            # Проверка победы
             current_score = len(self.snake.snake)
             if current_score >= self.level.target_score:
                 self._complete_level()
@@ -135,9 +140,11 @@ class Game:
     def _complete_level(self):
         self.is_level_completed = True
         if self.current_level_num < 3:
+            # Переход на следующий уровень
             self.current_level_num += 1
             self.level = GameLevel(Level(self.current_level_num))
             self.start_level_time = time.time()
+            # Сброс змейки
             head = self._get_spawn_element_for_level()
             self.snake = Snake(head)
             self.food = self._generate_food()
@@ -158,8 +165,10 @@ class Game:
             pass
 
     def _get_spawn_element_for_level(self):
+        # Для 3 уровня: сверху по центру
         if self.current_level_num == 3:
             return Element(WIDTH // 2, 1)
+        # Для остальных уровней - дефолт
         return get_center_element()
 
     def loop(self):
