@@ -110,7 +110,6 @@ class Infrastructure:
         self.screen.blit(
             message,
             message.get_rect(center=((WIDTH // 2 * SCALE), (HEIGHT // 2 * SCALE)))
-            # Помещает надпись в центр прямоугольника
         )
 
     def draw_centered_text(self, text: str, color: str, y: int = None, font=None):
@@ -145,13 +144,10 @@ class Infrastructure:
         """Отображает текущий уровень и цель"""
         text = f"Уровень {level_num}  |  Цель: {target}"
         rendered = self.font.render(text, True, pygame.Color("white"))
-        self.screen.blit(rendered, (5, 40))  # ниже счёта
+        self.screen.blit(rendered, (5, 40))
 
     def draw_level_complete(self, level_num: int):
         """Сообщение о прохождении уровня"""
-        if level_num < 3:
-            message = self.font.render(f"Уровень {level_num} пройден!", True, pygame.Color("green"))
-            #system.sleep(0.5)
-        else:
+        if level_num == 3:
             message = self.font.render("ИГРА ПРОЙДЕНА!", True, pygame.Color("green"))
-        self.screen.blit(message, message.get_rect(center=(WIDTH * SCALE // 2, HEIGHT * SCALE // 2 - 50)))
+            self.screen.blit(message, message.get_rect(center=(WIDTH * SCALE // 2, HEIGHT * SCALE // 2 - 50)))
