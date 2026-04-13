@@ -222,7 +222,7 @@ class Game:
             will_eat_special = self.special_food is not None and (
                     new_head == self.special_food.element)
             will_eat = will_eat_normal or will_eat_special
-
+            collision = False
             if self.snake.is_contains(new_head):
                 if will_eat:
                     collision = True
