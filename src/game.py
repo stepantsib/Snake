@@ -20,6 +20,8 @@ class Game:
         head = self._get_spawn_element_for_level()
         self.snake = Snake(head)
 
+        self.portal_1, self.portal_2 = self._generate_portals()
+
         self.normal_food = self._generate_normal_food()
         self.special_food = None
         self.special_food_spawn_tick = 0
@@ -39,6 +41,9 @@ class Game:
     def _generate_normal_food(self) -> Food:
         while True:
             element = gen_apple(self.snake, self.level)
+            if hasattr(self, 'portal_1') and (
+                    element == self.portal_1 or element == self.portal_2):
+                continue
             # Проверяем, чтобы обычная еда не заспавнилась поверх специальной
             if (not hasattr(self,
                             'special_food') or self.special_food is None or
@@ -48,6 +53,9 @@ class Game:
     def _generate_special_food(self) -> Food:
         while True:
             element = gen_apple(self.snake, self.level)
+            if hasattr(self, 'portal_1') and (
+                    element == self.portal_1 or element == self.portal_2):
+                continue
             # Проверяем, чтобы специальная еда не заспавнилась поверх обычной
             if element != self.normal_food.element:
                 break
@@ -78,6 +86,11 @@ class Game:
         # Рисуем препятствия
         for ox, oy in self.level.obstacles:
             self.infrastructure.draw_element(ox, oy, "gray")
+
+        self.infrastructure.draw_element(self.portal_1.x, self.portal_1.y,
+                                         "purple")
+        self.infrastructure.draw_element(self.portal_2.x, self.portal_2.y,
+                                         "purple")
 
         # Рисуем еду
         self.infrastructure.draw_element(self.normal_food.x,
@@ -135,6 +148,11 @@ class Game:
         if not self.tick_counter % self.snake_speed_delay:
             new_head = self.snake.get_new_head()
 
+            if new_head == self.portal_1:
+                new_head = self.portal_2
+            elif new_head == self.portal_2:
+                new_head = self.portal_1
+
             if self.level.is_obstacle(new_head.x, new_head.y):
                 self.infrastructure.play_crash_wall_sound()  # Включаем звук
                 self.is_game_over = True
@@ -175,7 +193,7 @@ class Game:
                         self.special_food = None
                         self.special_food_next_spawn_tick = (self.tick_counter
                                                              + randint(
-                            5 * FPS, 15 * FPS))
+                                    5 * FPS, 15 * FPS))
                 else:
                     self.snake.dequeue()
 
@@ -207,6 +225,9 @@ class Game:
             # Сброс змейки
             head = self._get_spawn_element_for_level()
             self.snake = Snake(head)
+
+            self.portal_1, self.portal_2 = self._generate_portals()
+
             self.normal_food = self._generate_normal_food()
             self.special_food = None
             self.special_food_spawn_tick = 0
@@ -236,6 +257,32 @@ class Game:
             return Element(WIDTH // 2, 1)
         # Для остальных уровней - дефолт
         return get_center_element()
+
+    def _generate_portals(self) -> tuple[Element, Element]:
+        portals = []
+
+        min_distance = 15
+
+        while len(portals) < 2:
+            candidate = gen_random_element()
+
+            if (self.level.is_obstacle(candidate.x, candidate.y)
+                    or candidate == self.snake.snake[0]):
+                continue
+
+            if len(portals) == 0:
+                # Первый портал добавляем без проверок расстояния
+                portals.append(candidate)
+            else:
+                # Для второго портала вычисляем дистанцию до первого
+                p1 = portals[0]
+                distance = abs(candidate.x - p1.x) + abs(candidate.y - p1.y)
+
+                # Добавляем второй портал, только если он достаточно далеко
+                if distance >= min_distance:
+                    portals.append(candidate)
+
+        return portals[0], portals[1]
 
     def loop(self):
         """
