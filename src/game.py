@@ -34,6 +34,8 @@ class Game:
         self.is_game_over = False
         self.is_level_completed = False
 
+        self.is_waiting_for_start = True  # Змейка ждёт команды
+
     def _generate_normal_food(self) -> Food:
         while True:
             element = gen_apple(self.snake, self.level)
@@ -62,6 +64,9 @@ class Game:
         new_direction = self.infrastructure.get_pressed_key()
         if new_direction is not None:
             self.snake.set_direction(new_direction)
+            # Если мы ждали старта, любое нажатие запускает игру
+            if self.is_waiting_for_start:
+                self.is_waiting_for_start = False
 
     def render(self):
         self.infrastructure.fill_screen()
@@ -92,6 +97,9 @@ class Game:
         self.infrastructure.draw_level_info(self.current_level_num,
                                             self.level.target_score)
 
+        if self.is_waiting_for_start:
+            self.infrastructure.draw_level_start_hint()
+
         if self.is_game_over:
             self.infrastructure.draw_game_over()
         elif self.is_level_completed:
@@ -100,7 +108,8 @@ class Game:
         self.infrastructure.update_and_tick()
 
     def update_state(self):
-        if self.is_game_over or self.is_level_completed:
+        if (self.is_game_over or self.is_level_completed or
+                self.is_waiting_for_start):
             return
 
         self.tick_counter += 1
@@ -161,7 +170,7 @@ class Game:
                         # Задаем время следующего спавна после того, как съели
                         self.special_food_next_spawn_tick = (self.tick_counter
                                                              + randint(
-                            1 * FPS, 5 * FPS))
+                                    1 * FPS, 5 * FPS))
                 else:
                     self.snake.dequeue()
 
@@ -197,6 +206,7 @@ class Game:
             self.special_food = None
             self.special_food_spawn_tick = 0
             self.special_food_next_spawn_tick = self.tick_counter + (5 * FPS)
+            self.is_waiting_for_start = True
             self.is_level_completed = False
         else:
             total_time = int(time.time() - self.game_start_time)

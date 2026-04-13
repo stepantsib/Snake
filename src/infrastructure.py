@@ -164,3 +164,10 @@ class Infrastructure:
                                        pygame.Color("green"))
         self.screen.blit(message, message.get_rect(
             center=(WIDTH * SCALE // 2, HEIGHT * SCALE // 2 - 50)))
+
+    def draw_level_start_hint(self):
+        """Рисует подсказку для начала движения"""
+        self.draw_centered_text("Нажмите любую стрелку,", "white",
+                                y=HEIGHT * SCALE // 2 + 50)
+        self.draw_centered_text("чтобы начать движение", "white",
+                                y=HEIGHT * SCALE // 2 + 80)
