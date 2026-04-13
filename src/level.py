@@ -12,7 +12,6 @@ class GameLevel:
     def __init__(self, level: Level):
         self.level = level
         self.target_score = self._get_target_score()
-        self.target_score = self._get_target_score()
         self.obstacles = self._get_obstacles()
 
     def _get_target_score(self):
@@ -33,6 +32,3 @@ class GameLevel:
 
     def is_obstacle(self, x: int, y: int) -> bool:
         return (x, y) in self.obstacles
-
-    def get_level_name(self) -> str:
-        return f"Уровень {self.level.value}"

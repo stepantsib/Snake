@@ -15,17 +15,17 @@ class Game:
         self.current_level_num = 1
         self.level = GameLevel(Level.ONE)
         self.game_start_time = time.time()
-        self.start_level_time = time.time()
 
         head = self._get_spawn_element_for_level()
         self.snake = Snake(head)
 
         self.portal_1, self.portal_2 = self._generate_portals()
 
-        self.normal_food = self._generate_normal_food()
         self.special_food = None
         self.special_food_spawn_tick = 0
         self.special_food_next_spawn_tick = FPS * 5
+        self.normal_food = self._generate_normal_food()
+
         self.tick_counter = 0
         self.snake_speed_delay = INITIAL_SPEED_DELAY
 
@@ -44,15 +44,16 @@ class Game:
         self.speedhack_active = False
 
     def _generate_normal_food(self) -> Food:
+        """Генерирует обычную еду, избегая порталов и специальной еды"""
         while True:
             element = gen_apple(self.snake, self.level)
-            if hasattr(self, 'portal_1') and (
-                    element == self.portal_1 or element == self.portal_2):
+
+            # Не спавним еду на порталах
+            if element == self.portal_1 or element == self.portal_2:
                 continue
-            # Проверяем, чтобы обычная еда не заспавнилась поверх специальной
-            if (not hasattr(self,
-                            'special_food') or self.special_food is None or
-                    element != self.special_food.element):
+
+            # Не спавним обычную еду поверх специальной
+            if self.special_food is None or element != self.special_food.element:
                 return Food(element, FoodType.NORMAL)
 
     def _generate_special_food(self) -> Food:
@@ -278,7 +279,6 @@ class Game:
         if self.current_level_num < 3:
             self.current_level_num += 1
             self.level = GameLevel(Level(self.current_level_num))
-            self.start_level_time = time.time()
 
             # Сброс змейки и объектов
             head = self._get_spawn_element_for_level()
