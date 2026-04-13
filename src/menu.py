@@ -63,7 +63,7 @@ class Menu:
         self.music_button = self.main_buttons[3]
 
         try:
-            pygame.mixer.music.load("background_music.mp3")
+            pygame.mixer.music.load("sounds/background_music.mp3")
             pygame.mixer.music.set_volume(0.4)
             pygame.mixer.music.play(-1)
         except:

@@ -1,6 +1,7 @@
 import pygame
 from direction import Direction
 from constants import *
+from food import FoodType
 
 
 class Infrastructure:
@@ -17,11 +18,35 @@ class Infrastructure:
         и отображения. Запускает PyGame, инициализирует экран и часы
         """
         pygame.init()
+        pygame.mixer.init()
+
         self.font = pygame.font.Font(None, SCALE)
         self.screen = pygame.display.set_mode([WIDTH * SCALE, HEIGHT * SCALE])
         self.clock = pygame.time.Clock()
 
         self._events = []
+
+        self.sounds = {}
+        self.sfx_enabled = True
+        try:
+            self.sounds['eat_normal'] = pygame.mixer.Sound("sounds/red "
+                                                           "apple.mp3")
+            self.sounds['eat_speed'] = pygame.mixer.Sound("sounds/cyan "
+                                                          "apple.mp3")
+            self.sounds['eat_shrink'] = pygame.mixer.Sound(
+                "sounds/white apple.mp3")
+            self.sounds['crash_wall'] = pygame.mixer.Sound(
+                "sounds/crash_wall.mp3")
+            self.sounds['crash_self'] = pygame.mixer.Sound("sounds/crash "
+                                                           "self.mp3")
+        except FileNotFoundError:
+            print(
+                "Предупреждение: Звуковые файлы SFX не найдены. Игра "
+                "запустится без эффектов.")
+            self.sfx_enabled = False
+        except Exception as e:
+            print(f"Ошибка загрузки звуков: {e}")
+            self.sfx_enabled = False
 
     def pump_events(self):
         self._events = pygame.event.get()
@@ -171,3 +196,25 @@ class Infrastructure:
                                 y=HEIGHT * SCALE // 2 + 50)
         self.draw_centered_text("чтобы начать движение", "white",
                                 y=HEIGHT * SCALE // 2 + 80)
+
+    def play_sound(self, sound_name: str):
+        """Универсальный метод проигрывания звука по ключу"""
+        if self.sfx_enabled and sound_name in self.sounds:
+            self.sounds[sound_name].play()
+
+    def play_eat_sound(self, food_type: FoodType):
+        """Проигрывает звук в зависимости от типа съеденной еды"""
+        if food_type == FoodType.NORMAL:
+            self.play_sound('eat_normal')
+        elif food_type == FoodType.SPEED:
+            self.play_sound('eat_speed')
+        elif food_type == FoodType.SHRINK:
+            self.play_sound('eat_shrink')
+
+    def play_crash_wall_sound(self):
+        """Звук удара о препятствие или стену"""
+        self.play_sound('crash_wall')
+
+    def play_crash_self_sound(self):
+        """Звук укуса собственного хвоста"""
+        self.play_sound('crash_self')

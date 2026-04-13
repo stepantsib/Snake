@@ -136,11 +136,11 @@ class Game:
             new_head = self.snake.get_new_head()
 
             if self.level.is_obstacle(new_head.x, new_head.y):
+                self.infrastructure.play_crash_wall_sound()  # Включаем звук
                 self.is_game_over = True
                 self.is_running = False
                 return
 
-            # Проверяем, съели ли мы какую-то еду в этом кадре
             will_eat_normal = (new_head == self.normal_food.element)
             will_eat_special = self.special_food is not None and (
                     new_head == self.special_food.element)
@@ -156,21 +156,26 @@ class Game:
                         collision = True
 
             if collision:
+                self.infrastructure.play_crash_self_sound()  # Включаем звук
                 self.is_game_over = True
                 self.is_running = False
             else:
                 self.snake.enqueue(new_head)
+
                 if will_eat:
                     if will_eat_normal:
+                        self.infrastructure.play_eat_sound(
+                            FoodType.NORMAL)  # Включаем звук
                         self.normal_food = self._generate_normal_food()
 
                     if will_eat_special:
+                        self.infrastructure.play_eat_sound(
+                            self.special_food.type)  # Включаем звук
                         self._apply_special_food(self.special_food.type)
                         self.special_food = None
-                        # Задаем время следующего спавна после того, как съели
                         self.special_food_next_spawn_tick = (self.tick_counter
                                                              + randint(
-                                    1 * FPS, 5 * FPS))
+                            5 * FPS, 15 * FPS))
                 else:
                     self.snake.dequeue()
 
