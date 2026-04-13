@@ -19,7 +19,8 @@ class Snake:
 
     def is_contains(self, element: Element) -> bool:
         """
-        :param element: элемент поля, содержание которого в змейке нужно проверить
+        :param element: элемент поля, содержание которого в змейке нужно
+        проверить
         :return: True или False
         """
         try:
@@ -30,7 +31,8 @@ class Snake:
 
     def get_new_head(self) -> Element:
         """
-        Вычисляет новую голову змейки в зависимости от направления движения с учётом перехода сквозь стены.
+        Вычисляет новую голову змейки в зависимости от направления движения с
+        учётом перехода сквозь стены.
         :return:
         """
         head = self.snake[0]
@@ -57,12 +59,14 @@ class Snake:
         :param new_direction: направление, которое нужно установить
         :return:
         """
-        if len(self.snake) == 1 or new_direction.value % 2 != self.direction.value % 2:
+        if (len(self.snake) == 1 or new_direction.value % 2 !=
+                self.direction.value % 2):
             self.direction = new_direction
 
     def enqueue(self, new_head: Element):
         """
-        Добавляет новую голову в начало змейки, используется когда змейка съедает яблоко
+        Добавляет новую голову в начало змейки, используется когда змейка
+        съедает яблоко
         :param new_head: Новый элемент головы змейки
         :return:
         """

@@ -5,13 +5,15 @@ from constants import *
 
 class Infrastructure:
     """
-    Инфраструктурный слой представляет собой методы для обращения к библиотеке PyGame.
+    Инфраструктурный слой представляет собой методы для обращения к
+    библиотеке PyGame.
     Только в этом файле import pygame.
     """
 
     def __init__(self):
         """
-        Конструктор, создаёт экземпляр класса Infrastructure, отвечающий за связь логики
+        Конструктор, создаёт экземпляр класса Infrastructure, отвечающий за
+        связь логики
         и отображения. Запускает PyGame, инициализирует экран и часы
         """
         pygame.init()
@@ -82,7 +84,8 @@ class Infrastructure:
         pygame.draw.rect(
             self.screen,  # Где рисовать?
             pygame.Color(color),  # Какого цвета рисовать?
-            (x * SCALE, y * SCALE, ELEMENT_SIZE, ELEMENT_SIZE),  # Позиция и размер прямоугольника
+            (x * SCALE, y * SCALE, ELEMENT_SIZE, ELEMENT_SIZE),
+            # Позиция и размер прямоугольника
             0,  # Толщина границы (0 = заливка)
             RADIUS,  # Радиус скругления углов
         )
@@ -106,13 +109,17 @@ class Infrastructure:
         Функция рисует большую красную надпись GAME OVER посередине экрана.
         :return:
         """
-        message = self.font.render("GAME OVER", True, pygame.Color(GAME_OVER_COLOR))
+        message = self.font.render("GAME OVER", True,
+                                   pygame.Color(GAME_OVER_COLOR))
         self.screen.blit(
             message,
-            message.get_rect(center=((WIDTH // 2 * SCALE), (HEIGHT // 2 * SCALE)))
+            message.get_rect(
+                center=((WIDTH // 2 * SCALE), (HEIGHT // 2 * SCALE)))
+            # Помещает надпись в центр прямоугольника
         )
 
-    def draw_centered_text(self, text: str, color: str, y: int = None, font=None):
+    def draw_centered_text(self, text: str, color: str, y: int = None,
+                           font=None):
         """
         Универсальный метод для рисования текста по центру экрана.
         Используется в игре и в меню — дублирование убрано.
@@ -144,10 +151,16 @@ class Infrastructure:
         """Отображает текущий уровень и цель"""
         text = f"Уровень {level_num}  |  Цель: {target}"
         rendered = self.font.render(text, True, pygame.Color("white"))
-        self.screen.blit(rendered, (5, 40))
+        self.screen.blit(rendered, (5, 40))  # ниже счёта
 
     def draw_level_complete(self, level_num: int):
         """Сообщение о прохождении уровня"""
-        if level_num == 3:
-            message = self.font.render("ИГРА ПРОЙДЕНА!", True, pygame.Color("green"))
-            self.screen.blit(message, message.get_rect(center=(WIDTH * SCALE // 2, HEIGHT * SCALE // 2 - 50)))
+        if level_num < 3:
+            message = self.font.render(f"Уровень {level_num} пройден!", True,
+                                       pygame.Color("green"))
+            # system.sleep(0.5)
+        else:
+            message = self.font.render("ИГРА ПРОЙДЕНА!", True,
+                                       pygame.Color("green"))
+        self.screen.blit(message, message.get_rect(
+            center=(WIDTH * SCALE // 2, HEIGHT * SCALE // 2 - 50)))

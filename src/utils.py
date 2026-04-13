@@ -24,5 +24,6 @@ def gen_apple(snake: Snake, game_level) -> Element:
     """Генерирует яблоко вне змейки и вне препятствий"""
     while True:
         candidate = gen_random_element()
-        if not snake.is_contains(candidate) and not game_level.is_obstacle(candidate.x, candidate.y):
+        if not snake.is_contains(candidate) and not game_level.is_obstacle(
+                candidate.x, candidate.y):
             return candidate
