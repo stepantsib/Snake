@@ -2,7 +2,7 @@ from infrastructure import Infrastructure
 from utils import *
 from food import Food, FoodType
 from constants import *
-from random import choices
+from random import choices, randint
 from level import GameLevel, Level
 import time
 from element import Element
@@ -20,7 +20,10 @@ class Game:
         head = self._get_spawn_element_for_level()
         self.snake = Snake(head)
 
-        self.food = self._generate_food()
+        self.normal_food = self._generate_normal_food()
+        self.special_food = None
+        self.special_food_spawn_tick = 0
+        self.special_food_next_spawn_tick = FPS * 5
         self.tick_counter = 0
         self.snake_speed_delay = INITIAL_SPEED_DELAY
 
@@ -31,12 +34,24 @@ class Game:
         self.is_game_over = False
         self.is_level_completed = False
 
-    def _generate_food(self) -> Food:
-        element = gen_apple(self.snake,
-                            self.level)  # передаём уровень для
-        # избежания препятствий
-        types = [FoodType.NORMAL, FoodType.SPEED, FoodType.SHRINK]
-        weights = [75, 23, 2]
+    def _generate_normal_food(self) -> Food:
+        while True:
+            element = gen_apple(self.snake, self.level)
+            # Проверяем, чтобы обычная еда не заспавнилась поверх специальной
+            if (not hasattr(self,
+                            'special_food') or self.special_food is None or
+                    element != self.special_food.element):
+                return Food(element, FoodType.NORMAL)
+
+    def _generate_special_food(self) -> Food:
+        while True:
+            element = gen_apple(self.snake, self.level)
+            # Проверяем, чтобы специальная еда не заспавнилась поверх обычной
+            if element != self.normal_food.element:
+                break
+
+        types = [FoodType.SPEED, FoodType.SHRINK]
+        weights = [24, 1]
         food_type = choices(types, weights=weights, k=1)[0]
         return Food(element, food_type)
 
@@ -60,13 +75,16 @@ class Game:
             self.infrastructure.draw_element(ox, oy, "gray")
 
         # Рисуем еду
-        color = {
-            FoodType.NORMAL: NORMAL_FOOD_COLOR,
-            FoodType.SPEED: SPEED_FOOD_COLOR,
-            FoodType.SHRINK: SHRINK_FOOD_COLOR
-        }[self.food.type]
-        self.infrastructure.draw_element(self.food.x, self.food.y,
-                                         color)
+        self.infrastructure.draw_element(self.normal_food.x,
+                                         self.normal_food.y,
+                                         NORMAL_FOOD_COLOR)
+        if self.special_food:
+            special_color = SPEED_FOOD_COLOR if (self.special_food.type ==
+                                                 FoodType.SPEED) else (
+                SHRINK_FOOD_COLOR)
+            self.infrastructure.draw_element(self.special_food.x,
+                                             self.special_food.y,
+                                             special_color)
 
         # Счёт и уровень
         current_score = len(self.snake.snake)
@@ -87,6 +105,19 @@ class Game:
 
         self.tick_counter += 1
 
+        if self.special_food:
+            # Если прошло 10 секунд (10 * FPS) — еда исчезает
+            if self.tick_counter >= self.special_food_spawn_tick + (10 * FPS):
+                self.special_food = None
+                # Следующая появится через случайное время от 1 до 3 секунд
+                self.special_food_next_spawn_tick = self.tick_counter + randint(
+                    1 * FPS, 3 * FPS)
+        else:
+            # Спавним специальную еду, если пришло время
+            if self.tick_counter >= self.special_food_next_spawn_tick:
+                self.special_food = self._generate_special_food()
+                self.special_food_spawn_tick = self.tick_counter
+
         if (self.is_speed_boost_active and self.tick_counter >=
                 self.speed_boost_end_tick):
             self.is_speed_boost_active = False
@@ -100,7 +131,11 @@ class Game:
                 self.is_running = False
                 return
 
-            will_eat = (new_head == self.food.element)
+            # Проверяем, съели ли мы какую-то еду в этом кадре
+            will_eat_normal = (new_head == self.normal_food.element)
+            will_eat_special = self.special_food is not None and (
+                    new_head == self.special_food.element)
+            will_eat = will_eat_normal or will_eat_special
 
             collision = False
             if self.snake.is_contains(new_head):
@@ -117,25 +152,31 @@ class Game:
             else:
                 self.snake.enqueue(new_head)
                 if will_eat:
-                    self._eat_food()
+                    if will_eat_normal:
+                        self.normal_food = self._generate_normal_food()
+
+                    if will_eat_special:
+                        self._apply_special_food(self.special_food.type)
+                        self.special_food = None
+                        # Задаем время следующего спавна после того, как съели
+                        self.special_food_next_spawn_tick = (self.tick_counter
+                                                             + randint(
+                            1 * FPS, 5 * FPS))
                 else:
                     self.snake.dequeue()
 
-            # Проверка победы
             current_score = len(self.snake.snake)
             if current_score >= self.level.target_score:
                 self._complete_level()
 
-    def _eat_food(self):
-        if self.food.type == FoodType.SPEED:
+    def _apply_special_food(self, food_type):
+        if food_type == FoodType.SPEED:
             self.is_speed_boost_active = True
             self.snake_speed_delay = INITIAL_SPEED_DELAY // 2
             self.speed_boost_end_tick = self.tick_counter + (5 * FPS)
 
-        elif self.food.type == FoodType.SHRINK:
+        elif food_type == FoodType.SHRINK:
             self._shrink_snake()
-
-        self.food = self._generate_food()
 
     def _shrink_snake(self):
         target_length = max(1, len(self.snake.snake) // 2)
@@ -152,7 +193,10 @@ class Game:
             # Сброс змейки
             head = self._get_spawn_element_for_level()
             self.snake = Snake(head)
-            self.food = self._generate_food()
+            self.normal_food = self._generate_normal_food()
+            self.special_food = None
+            self.special_food_spawn_tick = 0
+            self.special_food_next_spawn_tick = self.tick_counter + (5 * FPS)
             self.is_level_completed = False
         else:
             total_time = int(time.time() - self.game_start_time)
