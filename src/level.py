@@ -12,8 +12,8 @@ class GameLevel:
     def __init__(self, level: Level):
         self.level = level
         self.target_score = self._get_target_score()
+        self.target_score = self._get_target_score()
         self.obstacles = self._get_obstacles()
-        self.start_time = None
 
     def _get_target_score(self):
         if self.level == Level.ONE:

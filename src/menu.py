@@ -202,7 +202,7 @@ class Menu:
                 game = Game(self.infrastructure)
                 game.loop()
 
-                is_win = game.is_level_completed and game.current_level_num == 3
+                is_win = (not game.is_game_over) and game.current_level_num == 3
                 result = self.show_end_screen(is_win)
 
                 if result == "quit":

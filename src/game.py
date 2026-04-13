@@ -34,7 +34,6 @@ class Game:
 
         self.is_running = True
         self.is_game_over = False
-        self.is_level_completed = False
 
         self.is_waiting_for_start = True  # Змейка ждёт команды
 
@@ -171,8 +170,6 @@ class Game:
 
         if self.is_game_over:
             self.infrastructure.draw_game_over()
-        elif self.is_level_completed:
-            self.infrastructure.draw_level_complete(self.current_level_num)
 
         if self.console_active:
             self.infrastructure.draw_console(self.console_text)
@@ -180,8 +177,8 @@ class Game:
         self.infrastructure.update_and_tick()
 
     def update_state(self):
-        if (self.is_game_over or self.is_level_completed or
-                self.is_waiting_for_start or self.console_active):
+        if (self.is_game_over or self.is_waiting_for_start or
+                self.console_active):
             return
 
         self.tick_counter += 1
@@ -226,7 +223,6 @@ class Game:
                     new_head == self.special_food.element)
             will_eat = will_eat_normal or will_eat_special
 
-            collision = False
             if self.snake.is_contains(new_head):
                 if will_eat:
                     collision = True
@@ -270,6 +266,8 @@ class Game:
             if not self.speedhack_active:
                 self.snake_speed_delay = INITIAL_SPEED_DELAY // 2
             self.speed_boost_end_tick = self.tick_counter + (5 * FPS)
+        elif food_type == FoodType.SHRINK:
+            self._shrink_snake()
 
     def _shrink_snake(self):
         target_length = max(1, len(self.snake.snake) // 2)
@@ -277,13 +275,12 @@ class Game:
             self.snake.dequeue()
 
     def _complete_level(self):
-        self.is_level_completed = True
         if self.current_level_num < 3:
-            # Переход на следующий уровень
             self.current_level_num += 1
             self.level = GameLevel(Level(self.current_level_num))
             self.start_level_time = time.time()
-            # Сброс змейки
+
+            # Сброс змейки и объектов
             head = self._get_spawn_element_for_level()
             self.snake = Snake(head)
 
@@ -293,15 +290,15 @@ class Game:
             self.special_food = None
             self.special_food_spawn_tick = 0
             self.special_food_next_spawn_tick = self.tick_counter + (5 * FPS)
+
             self.is_waiting_for_start = True
-            self.is_level_completed = False
         else:
+            # Прохождение всей игры
             total_time = int(time.time() - self.game_start_time)
             self._save_highscore(total_time)
             print(f"Поздравляем! Вы прошли все уровни за {total_time} секунд!")
 
             self.is_running = False
-            self.is_level_completed = True
 
     def _save_highscore(self, time_sec: int):
         try:
@@ -328,7 +325,7 @@ class Game:
             candidate = gen_random_element()
 
             if (self.level.is_obstacle(candidate.x, candidate.y)
-                    or candidate == self.snake.snake[0]):
+                    or any(candidate == seg for seg in self.snake.snake)):
                 continue
 
             if len(portals) == 0:
