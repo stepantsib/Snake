@@ -43,21 +43,24 @@ class Menu:
         center_x = WIDTH * SCALE // 2 - 150
 
         self.main_buttons = [
-            Button(center_x, 180, 300, 60,
+            Button(center_x, 160, 300, 55,
                    "Начать игру", "#4CAF50", "#45a049",
                    "start"),
-            Button(center_x, 260, 300, 60,
+            Button(center_x, 230, 300, 55,
+                   "Легенда", "#9C27B0", "#7B1FA2",
+                   "legend"),
+            Button(center_x, 300, 300, 55,
                    "Таблица рекордов", "#2196F3",
                    "#1976D2", "highscores"),
-            Button(center_x, 340, 300, 60,
+            Button(center_x, 370, 300, 55,
                    "Музыка: ВКЛ", "#FF9800", "#F57C00",
                    "music"),
-            Button(center_x, 420, 300, 60,
+            Button(center_x, 440, 300, 55,
                    "Выйти", "#f44336", "#d32f2f",
                    "quit"),
         ]
 
-        self.music_button = self.main_buttons[2]
+        self.music_button = self.main_buttons[3]
 
         try:
             pygame.mixer.music.load("background_music.mp3")
@@ -209,8 +212,54 @@ class Menu:
             elif action == "highscores":
                 self.show_highscores()
 
+            elif action == "legend":
+                self.show_legend()
+
             elif action == "music":
                 self.toggle_music()
 
             self.draw_main_menu()
             self.infrastructure.clock.tick(60)
+
+    def show_legend(self):
+        """Экран с описанием типов еды"""
+        while True:
+            self.infrastructure.pump_events()
+
+            action = self._process_events(exit_on_input=True)
+            if action == "quit":
+                self.infrastructure.quit()
+                return
+            elif action == "exit":
+                return
+
+            self.infrastructure.fill_screen()
+
+            self.infrastructure.draw_centered_text(
+                "ЛЕГЕНДА ЕДЫ", "gold", y=80, font=self.big_font
+            )
+
+            # Описания элементов
+            legend_items = [
+                ("   Красная", "Обычная еда. Увеличивает длину змейки.", "red"),
+                ("   Бирюзовая", "Ускорение. Удваивает скорость на 5 секунд.",
+                 "cyan"),
+                ("   Белая", "Уменьшение. Сокращает змейку вдвое.", "white"),
+            ]
+
+            y_pos = 180
+            for label, desc, color in legend_items:
+                self.infrastructure.draw_element(5, y_pos // SCALE, color)
+                text_surf = self.font.render(f"{label}: {desc}", True,
+                                             pygame.Color("white"))
+                self.screen.blit(text_surf, (180, y_pos + 5))
+
+                y_pos += 90
+
+            self.infrastructure.draw_centered_text(
+                "Кликните или нажмите клавишу для возврата",
+                "gray",
+                y=HEIGHT * SCALE - 60
+            )
+
+            pygame.display.update()
