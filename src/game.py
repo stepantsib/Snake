@@ -38,6 +38,12 @@ class Game:
 
         self.is_waiting_for_start = True  # Змейка ждёт команды
 
+        # Переменные консоли и читов
+        self.console_active = False
+        self.console_text = ""
+        self.god_mode = False
+        self.speedhack_active = False
+
     def _generate_normal_food(self) -> Food:
         while True:
             element = gen_apple(self.snake, self.level)
@@ -69,12 +75,62 @@ class Game:
         if self.infrastructure.is_quit_event():
             self.is_running = False
 
+        if self.infrastructure.is_console_toggle_event():
+            self.console_active = not self.console_active
+            self.console_text = ""
+            return
+
+        # Если консоль открыта, перехватываем текст и блокируем управление
+        if self.console_active:
+            self.console_text, enter_pressed = (
+                self.infrastructure.process_text_input(
+                    self.console_text))
+            if enter_pressed:
+                self._apply_cheat(self.console_text.strip().lower())
+                self.console_active = False
+                self.console_text = ""
+            return
+
         new_direction = self.infrastructure.get_pressed_key()
         if new_direction is not None:
             self.snake.set_direction(new_direction)
             # Если мы ждали старта, любое нажатие запускает игру
             if self.is_waiting_for_start:
                 self.is_waiting_for_start = False
+
+    def _apply_cheat(self, command: str):
+        """Парсер и исполнитель чит-кодов"""
+        if command == "godmode":
+            self.god_mode = not self.god_mode
+            print(f"Чит: Режим бога {'ВКЛ' if self.god_mode else 'ВЫКЛ'}")
+
+
+        elif command == "speedhack":
+
+            self.speedhack_active = not self.speedhack_active
+            if self.speedhack_active:
+                self.snake_speed_delay = max(1, INITIAL_SPEED_DELAY // 4)
+                print("Чит: Активирована максимальная скорость (ВКЛ)")
+            else:
+                # При выключении возвращаем нормальную скорость
+                self.snake_speed_delay = INITIAL_SPEED_DELAY
+                print("Чит: Скорость возвращена в норму (ВЫКЛ)")
+
+        elif command == "grow":
+            # Искусственно дублируем хвост 5 раз
+            for _ in range(5):
+                self.snake.snake.append(self.snake.snake[-1])
+            print("Чит: Змейка мгновенно выросла на 5 сегментов")
+
+        elif command == "tiny":
+            # Сжимаем змейку до головы
+            while len(self.snake.snake) > 1:
+                self.snake.dequeue()
+            print("Чит: Змейка стала микроскопической")
+
+        elif command == "nextlevel":
+            self._complete_level()
+            print("Чит: Принудительный переход на следующий уровень")
 
     def render(self):
         self.infrastructure.fill_screen()
@@ -118,11 +174,14 @@ class Game:
         elif self.is_level_completed:
             self.infrastructure.draw_level_complete(self.current_level_num)
 
+        if self.console_active:
+            self.infrastructure.draw_console(self.console_text)
+
         self.infrastructure.update_and_tick()
 
     def update_state(self):
         if (self.is_game_over or self.is_level_completed or
-                self.is_waiting_for_start):
+                self.is_waiting_for_start or self.console_active):
             return
 
         self.tick_counter += 1
@@ -143,7 +202,9 @@ class Game:
         if (self.is_speed_boost_active and self.tick_counter >=
                 self.speed_boost_end_tick):
             self.is_speed_boost_active = False
-            self.snake_speed_delay = INITIAL_SPEED_DELAY
+            # Возвращаем обычную скорость только если чит выключен
+            if not self.speedhack_active:
+                self.snake_speed_delay = INITIAL_SPEED_DELAY
 
         if not self.tick_counter % self.snake_speed_delay:
             new_head = self.snake.get_new_head()
@@ -153,7 +214,8 @@ class Game:
             elif new_head == self.portal_2:
                 new_head = self.portal_1
 
-            if self.level.is_obstacle(new_head.x, new_head.y):
+            if (self.level.is_obstacle(new_head.x, new_head.y)
+                    and not self.god_mode):
                 self.infrastructure.play_crash_wall_sound()  # Включаем звук
                 self.is_game_over = True
                 self.is_running = False
@@ -173,7 +235,7 @@ class Game:
                     if new_head != tail:
                         collision = True
 
-            if collision:
+            if collision and not self.god_mode:
                 self.infrastructure.play_crash_self_sound()  # Включаем звук
                 self.is_game_over = True
                 self.is_running = False
@@ -192,8 +254,9 @@ class Game:
                         self._apply_special_food(self.special_food.type)
                         self.special_food = None
                         self.special_food_next_spawn_tick = (self.tick_counter
-                                                             + randint(
-                                    5 * FPS, 15 * FPS))
+                                                             + randint(5 * FPS,
+                                                                       15 *
+                                                                       FPS))
                 else:
                     self.snake.dequeue()
 
@@ -204,11 +267,9 @@ class Game:
     def _apply_special_food(self, food_type):
         if food_type == FoodType.SPEED:
             self.is_speed_boost_active = True
-            self.snake_speed_delay = INITIAL_SPEED_DELAY // 2
+            if not self.speedhack_active:
+                self.snake_speed_delay = INITIAL_SPEED_DELAY // 2
             self.speed_boost_end_tick = self.tick_counter + (5 * FPS)
-
-        elif food_type == FoodType.SHRINK:
-            self._shrink_snake()
 
     def _shrink_snake(self):
         target_length = max(1, len(self.snake.snake) // 2)

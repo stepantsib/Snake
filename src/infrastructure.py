@@ -183,7 +183,6 @@ class Infrastructure:
         if level_num < 3:
             message = self.font.render(f"Уровень {level_num} пройден!", True,
                                        pygame.Color("green"))
-            # system.sleep(0.5)
         else:
             message = self.font.render("ИГРА ПРОЙДЕНА!", True,
                                        pygame.Color("green"))
@@ -218,3 +217,40 @@ class Infrastructure:
     def play_crash_self_sound(self):
         """Звук укуса собственного хвоста"""
         self.play_sound('crash_self')
+
+    def is_console_toggle_event(self) -> bool:
+        """Проверяет, была ли нажата клавиша ~ (тильда) для открытия консоли"""
+        return any(
+            event.type == pygame.KEYDOWN and event.key == pygame.K_BACKQUOTE
+            for event in self._events
+        )
+
+    def process_text_input(self, current_text: str) -> tuple[str, bool]:
+        """
+        Обрабатывает ввод текста.
+        Возвращает обновленный текст и флаг, был ли нажат Enter.
+        """
+        text = current_text
+        enter_pressed = False
+        for event in self._events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    enter_pressed = True
+                elif event.key == pygame.K_BACKSPACE:
+                    text = text[:-1]
+                elif event.key != pygame.K_BACKQUOTE:  # Игнорируем саму тильду
+                    # Добавляем только печатные символы
+                    if event.unicode.isprintable():
+                        text += event.unicode
+        return text, enter_pressed
+
+    def draw_console(self, text: str):
+        """Отрисовка полупрозрачной консоли поверх игры"""
+        # Создаем полупрозрачную черную подложку
+        surface = pygame.Surface((WIDTH * SCALE, 60))
+        surface.set_alpha(220)
+        surface.fill((0, 0, 0))
+        self.screen.blit(surface, (0, 0))
+
+        rendered = self.font.render(f"> {text}_", True, pygame.Color("lime"))
+        self.screen.blit(rendered, (15, 18))
