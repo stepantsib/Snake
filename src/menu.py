@@ -4,7 +4,8 @@ from game import Game
 
 
 class Button:
-    def __init__(self, x, y, width, height, text, color, hover_color, action=None):
+    def __init__(self, x, y, width, height, text, color, hover_color,
+                 action=None):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
         self.color = color
@@ -14,8 +15,10 @@ class Button:
 
     def draw(self, screen, font):
         color = self.hover_color if self.hovered else self.color
-        pygame.draw.rect(screen, pygame.Color(color), self.rect, border_radius=12)
-        pygame.draw.rect(screen, pygame.Color("white"), self.rect, 3, border_radius=12)
+        pygame.draw.rect(screen, pygame.Color(color), self.rect,
+                         border_radius=12)
+        pygame.draw.rect(screen, pygame.Color("white"), self.rect, 3,
+                         border_radius=12)
 
         text_surf = font.render(self.text, True, pygame.Color("white"))
         text_rect = text_surf.get_rect(center=self.rect.center)
@@ -40,10 +43,18 @@ class Menu:
         center_x = WIDTH * SCALE // 2 - 150
 
         self.main_buttons = [
-            Button(center_x, 180, 300, 60, "Начать игру", "#4CAF50", "#45a049", "start"),
-            Button(center_x, 260, 300, 60, "Таблица рекордов", "#2196F3", "#1976D2", "highscores"),
-            Button(center_x, 340, 300, 60, "Музыка: ВКЛ", "#FF9800", "#F57C00", "music"),
-            Button(center_x, 420, 300, 60, "Выйти", "#f44336", "#d32f2f", "quit"),
+            Button(center_x, 180, 300, 60,
+                   "Начать игру", "#4CAF50", "#45a049",
+                   "start"),
+            Button(center_x, 260, 300, 60,
+                   "Таблица рекордов", "#2196F3",
+                   "#1976D2", "highscores"),
+            Button(center_x, 340, 300, 60,
+                   "Музыка: ВКЛ", "#FF9800", "#F57C00",
+                   "music"),
+            Button(center_x, 420, 300, 60,
+                   "Выйти", "#f44336", "#d32f2f",
+                   "quit"),
         ]
 
         self.music_button = self.main_buttons[2]
@@ -61,7 +72,8 @@ class Menu:
         if "недоступна" in self.music_button.text:
             return
         self.music_enabled = not self.music_enabled
-        self.music_button.text = "Музыка: ВКЛ" if self.music_enabled else "Музыка: ВЫКЛ"
+        self.music_button.text = "Музыка: ВКЛ" if self.music_enabled else \
+            "Музыка: ВЫКЛ"
         try:
             if self.music_enabled:
                 pygame.mixer.music.unpause()
@@ -116,7 +128,8 @@ class Menu:
 
             y = 160
             for line in records:
-                text = self.font.render(line.strip(), True, pygame.Color("white"))
+                text = self.font.render(line.strip(), True,
+                                        pygame.Color("white"))
                 self.screen.blit(text, (80, y))
                 y += 35
 
@@ -147,8 +160,12 @@ class Menu:
         """Экран выбора после окончания игры"""
         center_x = WIDTH * SCALE // 2 - 150
         end_buttons = [
-            Button(center_x, 240, 300, 60, "Начать новую игру", "#4CAF50", "#45a049", "restart"),
-            Button(center_x, 320, 300, 60, "Выйти из приложения", "#f44336", "#d32f2f", "quit")
+            Button(center_x, 240, 300, 60,
+                   "Начать новую игру", "#4CAF50",
+                   "#45a049", "restart"),
+            Button(center_x, 320, 300, 60,
+                   "Выйти из приложения", "#f44336",
+                   "#d32f2f", "quit")
         ]
 
         while True:

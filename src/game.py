@@ -32,7 +32,9 @@ class Game:
         self.is_level_completed = False
 
     def _generate_food(self) -> Food:
-        element = gen_apple(self.snake, self.level)  # передаём уровень для избежания препятствий
+        element = gen_apple(self.snake,
+                            self.level)  # передаём уровень для
+        # избежания препятствий
         types = [FoodType.NORMAL, FoodType.SPEED, FoodType.SHRINK]
         weights = [75, 23, 2]
         food_type = choices(types, weights=weights, k=1)[0]
@@ -63,12 +65,14 @@ class Game:
             FoodType.SPEED: SPEED_FOOD_COLOR,
             FoodType.SHRINK: SHRINK_FOOD_COLOR
         }[self.food.type]
-        self.infrastructure.draw_element(self.food.x, self.food.y, color)
+        self.infrastructure.draw_element(self.food.x, self.food.y,
+                                         color)
 
         # Счёт и уровень
         current_score = len(self.snake.snake)
         self.infrastructure.draw_score(current_score)
-        self.infrastructure.draw_level_info(self.current_level_num, self.level.target_score)
+        self.infrastructure.draw_level_info(self.current_level_num,
+                                            self.level.target_score)
 
         if self.is_game_over:
             self.infrastructure.draw_game_over()
@@ -83,7 +87,8 @@ class Game:
 
         self.tick_counter += 1
 
-        if self.is_speed_boost_active and self.tick_counter >= self.speed_boost_end_tick:
+        if (self.is_speed_boost_active and self.tick_counter >=
+                self.speed_boost_end_tick):
             self.is_speed_boost_active = False
             self.snake_speed_delay = INITIAL_SPEED_DELAY
 
@@ -160,7 +165,9 @@ class Game:
     def _save_highscore(self, time_sec: int):
         try:
             with open("highscores.txt", "a", encoding="utf-8") as f:
-                f.write(f"Уровень 3 | Время: {time_sec} сек | {time.strftime('%Y-%m-%d %H:%M')}\n")
+                f.write(
+                    f"Уровень 3 | Время: {time_sec} сек | "
+                    f"{time.strftime('%Y-%m-%d %H:%M')}\n")
         except:
             pass
 
