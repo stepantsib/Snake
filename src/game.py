@@ -35,9 +35,8 @@ class Game:
         self.is_running = True
         self.is_game_over = False
 
-        self.is_waiting_for_start = True  # Змейка ждёт команды
+        self.is_waiting_for_start = True
 
-        # Переменные консоли и читов
         self.console_active = False
         self.console_text = ""
         self.god_mode = False
@@ -48,11 +47,9 @@ class Game:
         while True:
             element = gen_apple(self.snake, self.level)
 
-            # Не спавним еду на порталах
             if element == self.portal_1 or element == self.portal_2:
                 continue
 
-            # Не спавним обычную еду поверх специальной
             if self.special_food is None or element != self.special_food.element:
                 return Food(element, FoodType.NORMAL)
 
@@ -62,7 +59,7 @@ class Game:
             if hasattr(self, 'portal_1') and (
                     element == self.portal_1 or element == self.portal_2):
                 continue
-            # Проверяем, чтобы специальная еда не заспавнилась поверх обычной
+
             if element != self.normal_food.element:
                 break
 
@@ -80,7 +77,7 @@ class Game:
             self.console_text = ""
             return
 
-        # Если консоль открыта, перехватываем текст и блокируем управление
+
         if self.console_active:
             self.console_text, enter_pressed = (
                 self.infrastructure.process_text_input(
@@ -94,7 +91,7 @@ class Game:
         new_direction = self.infrastructure.get_pressed_key()
         if new_direction is not None:
             self.snake.set_direction(new_direction)
-            # Если мы ждали старта, любое нажатие запускает игру
+
             if self.is_waiting_for_start:
                 self.is_waiting_for_start = False
 
@@ -112,18 +109,15 @@ class Game:
                 self.snake_speed_delay = max(1, INITIAL_SPEED_DELAY // 4)
                 print("Чит: Активирована максимальная скорость (ВКЛ)")
             else:
-                # При выключении возвращаем нормальную скорость
                 self.snake_speed_delay = INITIAL_SPEED_DELAY
                 print("Чит: Скорость возвращена в норму (ВЫКЛ)")
 
         elif command == "grow":
-            # Искусственно дублируем хвост 5 раз
             for _ in range(5):
                 self.snake.snake.append(self.snake.snake[-1])
             print("Чит: Змейка мгновенно выросла на 5 сегментов")
 
         elif command == "tiny":
-            # Сжимаем змейку до головы
             while len(self.snake.snake) > 1:
                 self.snake.dequeue()
             print("Чит: Змейка стала микроскопической")
@@ -135,11 +129,9 @@ class Game:
     def render(self):
         self.infrastructure.fill_screen()
 
-        # Рисуем змейку
         for e in self.snake.snake:
             self.infrastructure.draw_element(e.x, e.y, SNAKE_COLOR)
 
-        # Рисуем препятствия
         for ox, oy in self.level.obstacles:
             self.infrastructure.draw_element(ox, oy, "gray")
 
@@ -148,7 +140,6 @@ class Game:
         self.infrastructure.draw_element(self.portal_2.x, self.portal_2.y,
                                          "purple")
 
-        # Рисуем еду
         self.infrastructure.draw_element(self.normal_food.x,
                                          self.normal_food.y,
                                          NORMAL_FOOD_COLOR)
@@ -160,7 +151,6 @@ class Game:
                                              self.special_food.y,
                                              special_color)
 
-        # Счёт и уровень
         current_score = len(self.snake.snake)
         self.infrastructure.draw_score(current_score)
         self.infrastructure.draw_level_info(self.current_level_num,
@@ -185,14 +175,11 @@ class Game:
         self.tick_counter += 1
 
         if self.special_food:
-            # Если прошло 10 секунд (10 * FPS) — еда исчезает
             if self.tick_counter >= self.special_food_spawn_tick + (10 * FPS):
                 self.special_food = None
-                # Следующая появится через случайное время от 1 до 3 секунд
                 self.special_food_next_spawn_tick = self.tick_counter + randint(
                     1 * FPS, 3 * FPS)
         else:
-            # Спавним специальную еду, если пришло время
             if self.tick_counter >= self.special_food_next_spawn_tick:
                 self.special_food = self._generate_special_food()
                 self.special_food_spawn_tick = self.tick_counter
@@ -200,7 +187,6 @@ class Game:
         if (self.is_speed_boost_active and self.tick_counter >=
                 self.speed_boost_end_tick):
             self.is_speed_boost_active = False
-            # Возвращаем обычную скорость только если чит выключен
             if not self.speedhack_active:
                 self.snake_speed_delay = INITIAL_SPEED_DELAY
 
@@ -214,7 +200,7 @@ class Game:
 
             if (self.level.is_obstacle(new_head.x, new_head.y)
                     and not self.god_mode):
-                self.infrastructure.play_crash_wall_sound()  # Включаем звук
+                self.infrastructure.play_crash_wall_sound()
                 self.is_game_over = True
                 self.is_running = False
                 return
@@ -235,7 +221,7 @@ class Game:
                         collision = True
 
             if collision and not self.god_mode:
-                self.infrastructure.play_crash_self_sound()  # Включаем звук
+                self.infrastructure.play_crash_self_sound()
                 self.is_game_over = True
                 self.is_running = False
             else:
@@ -244,12 +230,12 @@ class Game:
                 if will_eat:
                     if will_eat_normal:
                         self.infrastructure.play_eat_sound(
-                            FoodType.NORMAL)  # Включаем звук
+                            FoodType.NORMAL)
                         self.normal_food = self._generate_normal_food()
 
                     if will_eat_special:
                         self.infrastructure.play_eat_sound(
-                            self.special_food.type)  # Включаем звук
+                            self.special_food.type)
                         self._apply_special_food(self.special_food.type)
                         self.special_food = None
                         self.special_food_next_spawn_tick = (self.tick_counter
@@ -282,7 +268,6 @@ class Game:
             self.current_level_num += 1
             self.level = GameLevel(Level(self.current_level_num))
 
-            # Сброс змейки и объектов
             head = self._get_spawn_element_for_level()
             self.snake = Snake(head)
 
@@ -295,14 +280,14 @@ class Game:
 
             self.is_waiting_for_start = True
         else:
-            # Прохождение всей игры
             total_time = int(time.time() - self.game_start_time)
             self._save_highscore(total_time)
             print(f"Поздравляем! Вы прошли все уровни за {total_time} секунд!")
 
             self.is_running = False
 
-    def _save_highscore(self, time_sec: int):
+    @staticmethod
+    def _save_highscore(time_sec: int):
         try:
             with open("highscores.txt", "a", encoding="utf-8") as f:
                 f.write(
@@ -312,10 +297,8 @@ class Game:
             pass
 
     def _get_spawn_element_for_level(self):
-        # Для 3 уровня: сверху по центру
         if self.current_level_num == 3:
             return Element(WIDTH // 2, 1)
-        # Для остальных уровней - дефолт
         return get_center_element()
 
     def _generate_portals(self) -> tuple[Element, Element]:
@@ -331,14 +314,11 @@ class Game:
                 continue
 
             if len(portals) == 0:
-                # Первый портал добавляем без проверок расстояния
                 portals.append(candidate)
             else:
-                # Для второго портала вычисляем дистанцию до первого
                 p1 = portals[0]
                 distance = abs(candidate.x - p1.x) + abs(candidate.y - p1.y)
 
-                # Добавляем второй портал, только если он достаточно далеко
                 if distance >= min_distance:
                     portals.append(candidate)
 

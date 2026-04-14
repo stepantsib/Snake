@@ -176,7 +176,7 @@ class Infrastructure:
         """Отображает текущий уровень и цель"""
         text = f"Уровень {level_num}  |  Цель: {target}"
         rendered = self.font.render(text, True, pygame.Color("white"))
-        self.screen.blit(rendered, (5, 40))  # ниже счёта
+        self.screen.blit(rendered, (5, 40))
 
     def draw_level_start_hint(self):
         """Рисует подсказку для начала движения"""
@@ -227,15 +227,13 @@ class Infrastructure:
                     enter_pressed = True
                 elif event.key == pygame.K_BACKSPACE:
                     text = text[:-1]
-                elif event.key != pygame.K_BACKQUOTE:  # Игнорируем саму тильду
-                    # Добавляем только печатные символы
+                elif event.key != pygame.K_BACKQUOTE:
                     if event.unicode.isprintable():
                         text += event.unicode
         return text, enter_pressed
 
     def draw_console(self, text: str):
         """Отрисовка полупрозрачной консоли поверх игры"""
-        # Создаем полупрозрачную черную подложку
         surface = pygame.Surface((WIDTH * SCALE, 60))
         surface.set_alpha(220)
         surface.fill((0, 0, 0))
