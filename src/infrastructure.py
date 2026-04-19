@@ -83,11 +83,11 @@ class Infrastructure:
         key = pygame.key.get_pressed()
         if key[pygame.K_UP] or key[pygame.K_w]:
             return Direction.DOWN
-        if key[pygame.K_RIGHT] or key[pygame.K_d]:
+        elif key[pygame.K_RIGHT] or key[pygame.K_d]:
             return Direction.RIGHT
-        if key[pygame.K_DOWN] or key[pygame.K_s]:
+        elif key[pygame.K_DOWN] or key[pygame.K_s]:
             return Direction.UP
-        if key[pygame.K_LEFT] or key[pygame.K_a]:
+        elif key[pygame.K_LEFT] or key[pygame.K_a]:
             return Direction.LEFT
         return None
 

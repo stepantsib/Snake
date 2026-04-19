@@ -56,8 +56,7 @@ class Game:
     def _generate_special_food(self) -> Food:
         while True:
             element = gen_apple(self.snake, self.level)
-            if hasattr(self, 'portal_1') and (
-                    element == self.portal_1 or element == self.portal_2):
+            if element == self.portal_1 or element == self.portal_2:
                 continue
 
             if element != self.normal_food.element:
@@ -210,15 +209,10 @@ class Game:
                     new_head == self.special_food.element)
             will_eat = will_eat_normal or will_eat_special
 
-            collision = self.snake.is_contains(new_head)
-            if collision:
-                tail = self.snake.snake[-1]
-                if not will_eat and new_head == tail:
-                    collision = False
-                else:
-                    tail = self.snake.snake[-1]
-                    if new_head != tail:
-                        collision = True
+            collision = (
+                    self.snake.is_contains(new_head)
+                    and not (new_head == self.snake.snake[-1] and not will_eat)
+            )
 
             if collision and not self.god_mode:
                 self.infrastructure.play_crash_self_sound()
