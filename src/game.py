@@ -1,11 +1,11 @@
-from infrastructure import Infrastructure
-from utils import *
-from food import Food, FoodType
-from constants import *
+from src.infrastructure import Infrastructure
+from src.utils import *
+from src.food import Food, FoodType
+from src.constants import *
+from src.level import GameLevel, Level
+from src.element import Element
 from random import choices, randint
-from level import GameLevel, Level
 import time
-from element import Element
 
 
 class Game:

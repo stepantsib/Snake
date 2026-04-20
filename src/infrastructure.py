@@ -1,7 +1,7 @@
 import pygame
-from direction import Direction
-from constants import *
-from food import FoodType
+from src.direction import Direction
+from src.constants import *
+from src.food import FoodType
 
 
 class Infrastructure:

@@ -1,6 +1,6 @@
 import pygame
-from constants import WIDTH, HEIGHT, SCALE
-from game import Game
+from src.constants import WIDTH, HEIGHT, SCALE
+from src.game import Game
 
 
 class Button:

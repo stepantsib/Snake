@@ -1,5 +1,5 @@
-from infrastructure import Infrastructure
-from menu import Menu
+from src.menu import Menu
+from src.infrastructure import Infrastructure
 
 if __name__ == "__main__":
     infrastructure = Infrastructure()
