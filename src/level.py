@@ -1,5 +1,5 @@
 from enum import Enum
-from constants import *
+from src.constants import *
 
 
 class Level(Enum):

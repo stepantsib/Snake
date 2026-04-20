@@ -1,7 +1,7 @@
 from collections import deque
-from element import Element
-from direction import Direction
-from constants import HEIGHT, WIDTH
+from src.element import Element
+from src.direction import Direction
+from src.constants import HEIGHT, WIDTH
 
 
 class Snake:

@@ -1,0 +1,6 @@
+[run]
+omit =
+    src/infrastructure.py
+    src/main.py
+    src/menu.py
+    src/game.py

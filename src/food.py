@@ -1,5 +1,5 @@
 from enum import Enum
-from element import Element
+from src.element import Element
 
 
 class FoodType(Enum):

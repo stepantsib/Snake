@@ -109,7 +109,7 @@ class Menu:
         try:
             with open("highscores.txt", "r", encoding="utf-8") as f:
                 records = f.readlines()[-10:]
-        except Exception:
+        except Exception as e:
             print(f"Файл с рекордами не найден. Ошибка {e}")
             records = ["Нет сохранённых рекордов."]
 

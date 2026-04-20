@@ -22,3 +22,7 @@ class Element:
         :return: True или False
         """
         return self.x == o.x and self.y == o.y
+
+    def __hash__(self) -> int:
+        """Позволяет использовать Element в множествах (set) и словарях (dict)"""
+        return hash((self.x, self.y))
