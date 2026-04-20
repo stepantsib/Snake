@@ -7,6 +7,7 @@ from level import GameLevel, Level
 import time
 from element import Element
 
+
 class Game:
     def __init__(self, infrastructure: Infrastructure):
         self.infrastructure = infrastructure
