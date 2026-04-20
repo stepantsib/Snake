@@ -66,7 +66,8 @@ class Menu:
             pygame.mixer.music.load("sounds/background_music.mp3")
             pygame.mixer.music.set_volume(0.4)
             pygame.mixer.music.play(-1)
-        except:
+        except Exception as e:
+            print(f"Файл с музыкой не найден. Ошибка {e}")
             self.music_enabled = False
             self.music_button.text = "Музыка: недоступна"
 
@@ -81,7 +82,8 @@ class Menu:
                 pygame.mixer.music.unpause()
             else:
                 pygame.mixer.music.pause()
-        except:
+        except Exception as e:
+            print(f"Ошибка: {e}")
             pass
 
     def _process_events(self, buttons=None, exit_on_input=False):
@@ -107,7 +109,8 @@ class Menu:
         try:
             with open("highscores.txt", "r", encoding="utf-8") as f:
                 records = f.readlines()[-10:]
-        except:
+        except Exception:
+            print(f"Файл с рекордами не найден. Ошибка {e}")
             records = ["Нет сохранённых рекордов."]
 
         while True:
@@ -202,7 +205,8 @@ class Menu:
                 game = Game(self.infrastructure)
                 game.loop()
 
-                is_win = (not game.is_game_over) and game.current_level_num == 3
+                is_win = ((not game.is_game_over)
+                          and game.current_level_num == 3)
                 result = self.show_end_screen(is_win)
 
                 if result == "quit":
@@ -240,7 +244,8 @@ class Menu:
             )
 
             legend_items = [
-                ("   Красная", "Обычная еда. Увеличивает длину змейки.", "red"),
+                ("   Красная", "Обычная еда. Увеличивает длину змейки.",
+                 "red"),
                 ("   Бирюзовая", "Ускорение. Удваивает скорость на 5 секунд.",
                  "cyan"),
                 ("   Белая", "Уменьшение. Сокращает змейку вдвое.", "white"),

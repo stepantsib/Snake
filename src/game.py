@@ -7,7 +7,6 @@ from level import GameLevel, Level
 import time
 from element import Element
 
-
 class Game:
     def __init__(self, infrastructure: Infrastructure):
         self.infrastructure = infrastructure
@@ -50,7 +49,8 @@ class Game:
             if element == self.portal_1 or element == self.portal_2:
                 continue
 
-            if self.special_food is None or element != self.special_food.element:
+            if (self.special_food is None or element !=
+                    self.special_food.element):
                 return Food(element, FoodType.NORMAL)
 
     def _generate_special_food(self) -> Food:
@@ -76,7 +76,6 @@ class Game:
             self.console_text = ""
             return
 
-
         if self.console_active:
             self.console_text, enter_pressed = (
                 self.infrastructure.process_text_input(
@@ -99,7 +98,6 @@ class Game:
         if command == "godmode":
             self.god_mode = not self.god_mode
             print(f"Чит: Режим бога {'ВКЛ' if self.god_mode else 'ВЫКЛ'}")
-
 
         elif command == "speedhack":
 
@@ -176,8 +174,8 @@ class Game:
         if self.special_food:
             if self.tick_counter >= self.special_food_spawn_tick + (10 * FPS):
                 self.special_food = None
-                self.special_food_next_spawn_tick = self.tick_counter + randint(
-                    1 * FPS, 3 * FPS)
+                self.special_food_next_spawn_tick = (
+                        self.tick_counter + randint(1 * FPS, 3 * FPS))
         else:
             if self.tick_counter >= self.special_food_next_spawn_tick:
                 self.special_food = self._generate_special_food()
@@ -287,8 +285,8 @@ class Game:
                 f.write(
                     f"Уровень 3 | Время: {time_sec} сек | "
                     f"{time.strftime('%Y-%m-%d %H:%M')}\n")
-        except:
-            pass
+        except Exception as e:
+            print(f"Ошибка записи в файл: {e}")
 
     def _get_spawn_element_for_level(self):
         if self.current_level_num == 3:
